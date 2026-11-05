@@ -1,7 +1,7 @@
 @echo off
 REM Avvia Codex Studio + tunnel pubblico sicuro (Cloudflare) su Windows.
 REM Usalo dal telefono ovunque (anche 4G): risposte da Claude col TUO abbonamento sul PC.
-setlocal
+setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
 if "%CODEX_PORT%"=="" set CODEX_PORT=4100
@@ -10,15 +10,17 @@ if "%CODEX_PASSWORD%"=="" set CODEX_PASSWORD=codex%RANDOM%%RANDOM%
 
 where node >nul 2>nul || (echo Node.js non trovato: https://nodejs.org & pause & exit /b 1)
 
-REM cloudflared: nel PATH, oppure cloudflared.exe in questa cartella.
-set "CF=cloudflared"
-where cloudflared >nul 2>nul || (
-  if exist "%~dp0cloudflared.exe" ( set "CF=%~dp0cloudflared.exe" ) else (
-    echo.
-    echo  cloudflared non trovato. Scaricalo come cloudflared.exe in questa cartella, poi riprova.
-    echo  (comando pronto nelle istruzioni che ti ha dato l'assistente^)
-    pause & exit /b 1
-  )
+REM Trova cloudflared: nel PATH, oppure un .exe scaricato in questa cartella (qualsiasi nome cloudflared*).
+set "CF="
+where cloudflared >nul 2>nul && set "CF=cloudflared"
+if not defined CF if exist "%~dp0cloudflared.exe" set "CF=%~dp0cloudflared.exe"
+if not defined CF for %%f in ("%~dp0cloudflared*.exe") do set "CF=%%f"
+if not defined CF (
+  echo.
+  echo  cloudflared non trovato. Scarica cloudflared-windows-amd64.exe e mettilo in questa cartella, poi riprova.
+  echo  Link: https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe
+  echo.
+  pause & exit /b 1
 )
 
 REM Libera la porta da eventuali vecchi server.
@@ -37,5 +39,5 @@ echo   (in alternativa, utente: %CODEX_USER%   password: %CODEX_PASSWORD%)
 echo   Tieni il PC acceso con queste finestre aperte.
 echo ============================================================
 echo.
-"%CF%" tunnel --url http://localhost:%CODEX_PORT%
+"!CF!" tunnel --url http://localhost:%CODEX_PORT%
 pause
