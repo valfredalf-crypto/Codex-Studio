@@ -415,9 +415,15 @@ async function init() {
   fillProviders();
   renderKeyRows();
 
-  // Service worker (PWA) — solo in produzione su HTTPS/localhost.
+  // Niente service worker: evita il problema della cache ("modalità browser"
+  // sul server locale). Disattiva eventuali SW vecchi e svuota le cache.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => { /* non bloccante */ });
+    navigator.serviceWorker.getRegistrations()
+      .then((rs) => rs.forEach((r) => r.unregister()))
+      .catch(() => { /* ignora */ });
+    if (window.caches) {
+      caches.keys().then((ks) => ks.forEach((k) => caches.delete(k))).catch(() => { /* ignora */ });
+    }
   }
 
   // Toggle pensiero
