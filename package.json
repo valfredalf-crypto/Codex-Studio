@@ -1,0 +1,16 @@
+{
+  "name": "codex-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "App unica per documenti tecnici, generazione app e SQL, collegata all'abbonamento Claude (via Claude Code) senza consumare crediti API.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "codex": "node server.js",
+    "demo": "MOCK=1 node server.js",
+    "test": "node --test test/*.test.js"
+  }
+}
